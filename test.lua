@@ -39,6 +39,86 @@ local Tabs = {
 
 
 
+local itemsToCompress = {
+    "Bolt",
+    "Sheet Metal",
+    "UFO Junk",
+    "UFO Component",
+    "Broken Fan",
+    "Broken Radio",
+    "Broken Microwave",
+    "Tyre",
+    "Metal Chair",
+    "Old Car Engine",
+    "Washing Machine",
+    "Cultist Experiment",
+    "Cultist Prototype",
+    "UFO Scrap"
+}
+
+getgenv().AutoWoodCompressList = {}
+getgenv().AutoWoodCompressOn = false
+
+local woodCutterPos = Vector3.new(21.15, 19, -6.12)
+
+Tabs.Main:Dropdown({
+    Title = "Choose Items To Auto Compress",
+    Values = itemsToCompress,
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(selected)
+        getgenv().AutoWoodCompressList = {}
+        for _, item in ipairs(selected) do
+            getgenv().AutoWoodCompressList[item] = true
+        end
+    end
+})
+
+Tabs.Main:Toggle({
+    Title = "Auto Wood Compress",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoWoodCompressOn = state
+    end
+})
+
+local itemsFolder = Workspace:WaitForChild("Items")
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+
+local function moveItemToWoodCutter(item)
+    local part = item.PrimaryPart or item:FindFirstChildWhichIsA("BasePart") or item:FindFirstChild("Handle")
+    if not part then return end
+    if not item.PrimaryPart then pcall(function() item.PrimaryPart = part end) end
+    pcall(function()
+        remoteEvents.RequestStartDraggingItem:FireServer(item)
+        task.wait(0.05)
+        item:SetPrimaryPartCFrame(CFrame.new(woodCutterPos))
+        task.wait(0.05)
+        remoteEvents.StopDraggingItem:FireServer(item)
+    end)
+end
+
+coroutine.wrap(function()
+    while true do
+        if getgenv().AutoWoodCompressOn then
+            for itemName, enabled in pairs(getgenv().AutoWoodCompressList) do
+                if enabled then
+                    for _, item in ipairs(itemsFolder:GetChildren()) do
+                        if item.Name == itemName then
+                            moveItemToWoodCutter(item)
+                        end
+                    end
+                end
+            end
+        end
+        task.wait(2)
+    end
+end)()
+
+
+
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
