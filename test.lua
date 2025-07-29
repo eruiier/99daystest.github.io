@@ -86,12 +86,14 @@ Tabs.KillAll:Toggle({
     end
 })
 
+
+
 Tabs.KillAll:Slider({
     Title = "Kill Aura Radius",
     Step = 1,
     Value = {Min = 10, Max = 150, Default = 100},
     Callback = function(val)
-        getgenv().KillAuraRadius = val
+        getgenv().KillAuraRadius = tonumber(val)
     end
 })
 
@@ -107,7 +109,7 @@ task.spawn(function()
                     for _, mob in ipairs(Workspace:WaitForChild("Characters"):GetChildren()) do
                         if mob:IsA("Model") then
                             local part = mob:FindFirstChildWhichIsA("BasePart")
-                            if part and (part.Position - hrp.Position).Magnitude <= getgenv().KillAuraRadius then
+                            if part and (part.Position - hrp.Position).Magnitude <= tonumber(getgenv().KillAuraRadius) then
                                 pcall(function()
                                     ToolDamageObject:InvokeServer(
                                         mob,
