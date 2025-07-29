@@ -45,6 +45,7 @@ local itemsToCompress = {
     "UFO Junk",
     "UFO Component",
     "Broken Fan",
+    "Log",
     "Broken Radio",
     "Broken Microwave",
     "Tyre",
